@@ -1,7 +1,7 @@
 module FDY where
 
 
-import Prelude (otherwise, (&&), (*), (+), (-), (/), (==))
+import Prelude 
 
 
 foreign import remainder :: Int -> Int -> Int 
@@ -9,6 +9,15 @@ foreign import remainder :: Int -> Int -> Int
 infixl 9 remainder as %
 
 data Day = SUN | MON | TUE | WED | THUR | FRI | SAT
+
+instance genShowForDay :: Show Day where 
+    show SUN = "Sunday"
+    show MON = "Monday"
+    show TUE = "Tuesday"
+    show WED = "Wednesday"
+    show THUR = "Thursday"
+    show FRI = "Friday"
+    show SAT = "Saturday"
 
 
 doomDays :: Int -> Int -> Int
@@ -31,12 +40,12 @@ numToDay 5 = FRI
 numToDay _ = SAT
 
 
-findDoomDay :: Int -> Int -> Int -> Int 
-findDoomDay cenCode lastTwo leapVal =
+findDoomDay :: Int -> Int ->  Int 
+findDoomDay cenCode lastTwo  =
     let secF = lastTwo % 12
         thirF = lastTwo / 12
-        fouF = thirF % secF
-    in (secF + thirF + fouF + leapVal) % 7 
+        fouF = secF/4 
+    in (cenCode + secF + thirF + fouF ) % 7 
 
 
 getCenturyCode :: Int -> Int
@@ -44,9 +53,11 @@ getCenturyCode 1800 = 5
 getCenturyCode 1900 = 3
 getCenturyCode 2000 = 2
 getCenturyCode 2100 = 0
-getCenturyCode x = find (((x - 1800)/100) % 4)
-    where
-        find val 
+getCenturyCode x = let diff = (x - 1800)/10
+                    in find (if diff < 31 && diff > -31 then diff/10  else diff % 4)
+
+find ::  Int -> Int
+find val 
             | val == 0 = getCenturyCode 1800
             | val == 1 = getCenturyCode 1900
             | val == 2 = getCenturyCode 2000
@@ -65,6 +76,6 @@ isLeapYear year = if year % 100 == 0 && year % 4 == 0 then true else false
 getMeDay :: Int -> Int -> Int -> Day
 getMeDay date mon year =
     let cenCode = getCenturyCode year
-        doomVal = findDoomDay cenCode (year % 10 + (year % 100)*10) (if isLeapYear year then 2 else 0)
+        doomVal = findDoomDay cenCode (year % 100) 
         diffVal = doomVal + date - (doomDays mon year)
      in numToDay (diffVal % 7)
