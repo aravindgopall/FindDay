@@ -77,5 +77,6 @@ getMeDay :: Int -> Int -> Int -> Day
 getMeDay date mon year =
     let cenCode = getCenturyCode year
         doomVal = findDoomDay cenCode (year % 100) 
-        diffVal = doomVal + date - (doomDays mon year)
+        doomDay = doomDays mon year
+        diffVal = if date < doomDay then doomDay + doomVal - date else doomVal + date - doomDay 
      in numToDay (diffVal % 7)
